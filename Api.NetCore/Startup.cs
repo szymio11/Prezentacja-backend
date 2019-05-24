@@ -30,8 +30,7 @@ namespace Api.NetCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default"),
-                b => b.MigrationsAssembly("Api.NetCore.DataAccess")));
+            services.AddDbContext<DataContext>(options => options.UseInMemoryDatabase());
 
             services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
@@ -49,15 +48,7 @@ namespace Api.NetCore
             services.AddMvcCore()
                 .AddAuthorization()
                 .AddJsonFormatters();
-            var authority = Configuration.GetSection("Authority").Value;
-            services.AddAuthentication("Bearer")
-                .AddIdentityServerAuthentication(options =>
-                {
-                    options.Authority = authority;
-                    options.RequireHttpsMetadata = false;
-
-                    options.ApiName = "api1";
-                });
+    
            
             services.AddSwaggerGen(c =>
             {
@@ -96,6 +87,8 @@ namespace Api.NetCore
             app.UseSignalR(routes =>
             {
                 routes.MapHub<NotificationHub>("/hub");
+                routes.MapHub<StreamHub>("/stream");
+
             });
             app.UseHttpsRedirection();
             app.UseMvc();

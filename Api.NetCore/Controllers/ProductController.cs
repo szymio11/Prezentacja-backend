@@ -52,7 +52,7 @@ namespace Api.NetCore.Controllers
             }
 
             var resultDto = _mapper.Map<GetProductsDto>(result.Value);
-            await _hubContext.Clients.All.SendAsync("Notification", resultDto);
+            await _hubContext.Clients.All.SendAsync("NotificationCreate", resultDto);
             return CreatedAtAction(nameof(GetById),
                 new {id = resultDto.Id},
                 resultDto);
@@ -135,8 +135,10 @@ namespace Api.NetCore.Controllers
             {
                 return NotFound(product.Errors);
             }
-
+            var resultDto = _mapper.Map<GetProductsDto>(product.Value);
+            await _hubContext.Clients.All.SendAsync("NotificationRemove", resultDto);
             await _logic.RemoveAsync(product.Value);
+            
             return Ok();
         }
     }
